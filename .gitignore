@@ -1,4 +1,6 @@
 **__pycached__/
 **videos/
 **imgs/
-data/
+**.npy
+**.pth
+
