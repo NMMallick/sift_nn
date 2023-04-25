@@ -144,7 +144,7 @@ class SIFTnnLabeler:
         for m, n in matches:
             if m.distance < 0.7 * n.distance:
                 good_matches.append(m)
-        print('Finished matching!')
+        print('Finished manually matching!')
 
         des1 = des1.tolist()
         des2 = des2.tolist()
@@ -171,13 +171,15 @@ class SIFTnnLabeler:
                 unmatched_des2.append(d)
 
         # Create the feature and validation datasets
-        num_pairs = 0
+        print(f'Pairing descriptors with valid and unvalid descriptors...')
         for m in good_matches:
             # save the positive match
             self.x.append(des1[m.queryIdx] + des2[m.trainIdx])
             self.y.append(1.0)
 
             for i, d2 in enumerate(des2):
+                if i > 500:
+                    break
                 if i == m.trainIdx:
                     continue
                 self.x.append(des1[m.queryIdx] + d2)
@@ -185,13 +187,15 @@ class SIFTnnLabeler:
                 num_pairs += 1
 
             for i, d1 in enumerate(des1):
+                if i > 500:
+                    break
                 if i == m.queryIdx:
                     continue
                 self.x.append(des2[m.trainIdx] + d1)
                 self.y.append(0.0)
                 num_pairs += 1
 
-        # Take 50 random samples from the unmatched descriptors and
+        # Take random samples from the unmatched descriptors and
         #   label them as false
         min = len(unmatched_des1) if len(unmatched_des1) < len(unmatched_des2) else len(unmatched_des2)
         unmatched_des1 = random.sample(unmatched_des1, min)
@@ -200,9 +204,9 @@ class SIFTnnLabeler:
         for i, _ in enumerate(unmatched_des1):
             self.x.append(unmatched_des1[i] + unmatched_des2[i])
             self.y.append(0.0)
-            num_pairs+=1
 
-        print(f'Number of pairs saved : {num_pairs}/{len(self.x)}')
+        # print(f'Number of pairs saved : {num_pairs}/{len(self.x)}')
+        print(f'Finished matching features!')
 
     def labelAndTrain(self, path, model=None, video=False):
 
